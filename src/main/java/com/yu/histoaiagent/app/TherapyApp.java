@@ -1,9 +1,12 @@
 package com.yu.histoaiagent.app;
 
 
+import com.yu.histoaiagent.advisor.MyLoggerAdvisor;
+import com.yu.histoaiagent.advisor.ReReadingAdvisor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -68,7 +71,9 @@ public class TherapyApp {
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYS_PROMPT)
                 .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                        new MyLoggerAdvisor(),
+                        new ReReadingAdvisor()
                 )
                 .build();
 
