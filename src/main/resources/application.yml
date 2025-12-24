@@ -3,11 +3,11 @@ spring:
     name: histo-ai-agent
   profiles:
     active: local
-  ai:
-    ollama:
-      base-url: http://localhost:11434
-      chat:
-        model:
+#  ai:
+#    ollama:
+#      base-url: http://localhost:11434
+#      chat:
+#        model:
 server:
   port: 8123
   servlet:
