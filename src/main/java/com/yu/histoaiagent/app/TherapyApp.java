@@ -6,14 +6,15 @@ import com.yu.histoaiagent.advisor.ReReadingAdvisor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -72,8 +73,8 @@ public class TherapyApp {
                 .defaultSystem(SYS_PROMPT)
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
-                        new MyLoggerAdvisor(),
-                        new ReReadingAdvisor()
+                        new MyLoggerAdvisor()
+                        //new ReReadingAdvisor()
                 )
                 .build();
 
@@ -93,9 +94,34 @@ public class TherapyApp {
                         a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)
                 )
                 .call()
+                // .entity(User.class)
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
         log.info("content: {}", content);
         return content;
+    }
+
+    record TherapyReport(String title, List<String> suggestions) {
+}
+
+
+        /**
+     * AI 对话结构化输出报告
+     * @param message
+     * @param conversationId
+     * @return
+     */
+    public TherapyReport doChatWithReport(String message, String conversationId) {
+        TherapyReport therapyReport = chatClient
+                .prompt()
+                .system(SYS_PROMPT + "每次对话后都要生成结果，标题为{用户名}的治疗报告，内容为提供的治疗建议")
+                .user(message)
+                .advisors(
+                        a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)
+                )
+                .call()
+                .entity(TherapyReport.class);
+        log.info("TherapyReport: {}", therapyReport);
+        return therapyReport;
     }
 }

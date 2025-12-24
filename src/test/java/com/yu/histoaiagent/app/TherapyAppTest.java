@@ -14,7 +14,7 @@ class TherapyAppTest {
     private TherapyApp therapyApp;
 
     @Test
-    void testChat() {
+    void doChat() {
         String conversationId = UUID.randomUUID().toString();
 
         String message = "你好，我是TT";
@@ -28,5 +28,14 @@ class TherapyAppTest {
         message = "你还记得我叫什么名字吗";
         answer = therapyApp.doChat(message, conversationId);
         Assertions.assertNotNull(answer);
+    }
+
+    @Test
+    void doChatWithReport() {
+        String conversationId = UUID.randomUUID().toString();
+
+        String message = "你好，我是TT。我经常在早上起床时感到胸口烦闷，一整天都没有精神";
+        TherapyApp.TherapyReport therapyReport = therapyApp.doChatWithReport(message, conversationId);
+        Assertions.assertNotNull(therapyReport);
     }
 }

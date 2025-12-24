@@ -5,8 +5,6 @@
 
 package com.yu.histoaiagent.advisor;
 
-import java.util.function.Function;
-
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +19,6 @@ import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.model.ModelOptionsUtils;
-import org.springframework.lang.Nullable;
 import reactor.core.publisher.Flux;
 
 /**
@@ -72,8 +68,8 @@ public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
                 .map(message -> ((UserMessage) message).getText()) // 安全转换获取内容
                 .orElse("无用户输入");
 
-		Object contextValue = request.context().getOrDefault("123", "未获取到值");
-		log.info("上下文 key=123 的值：{}", contextValue);
+		// Object contextValue = request.context().getOrDefault("123", "未获取到值");
+		// log.info("上下文 key=123 的值：{}", contextValue);
         log.info("AI Request: {}", userText);
 	}
 
