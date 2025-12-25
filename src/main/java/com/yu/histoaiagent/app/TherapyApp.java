@@ -3,6 +3,7 @@ package com.yu.histoaiagent.app;
 
 import com.yu.histoaiagent.advisor.MyLoggerAdvisor;
 import com.yu.histoaiagent.advisor.ReReadingAdvisor;
+import com.yu.histoaiagent.chatmemory.FileBasedChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -60,14 +61,18 @@ public class TherapyApp {
      * @param dashscopeChatModel
      */
     public TherapyApp(ChatModel dashscopeChatModel) {
-        // 内存存储对话上下文
-        InMemoryChatMemoryRepository chatMemoryRepository = new InMemoryChatMemoryRepository();
+        // 文件存储对话
+        String FILE_DIR = System.getProperty("user.dir") + "/tmp/chat-memory";
 
-        ChatMemory chatMemory = MessageWindowChatMemory
-                .builder()
-                .maxMessages(1)
-                .chatMemoryRepository(chatMemoryRepository)
-                .build();
+        ChatMemory chatMemory = new FileBasedChatMemory(FILE_DIR);
+        // 内存存储对话上下文
+//        InMemoryChatMemoryRepository chatMemoryRepository = new InMemoryChatMemoryRepository();
+//
+//        ChatMemory chatMemory = MessageWindowChatMemory
+//                .builder()
+//                .maxMessages(1)
+//                .chatMemoryRepository(chatMemoryRepository)
+//                .build();
 
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYS_PROMPT)
