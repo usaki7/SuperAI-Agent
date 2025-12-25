@@ -62,28 +62,15 @@ public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
 	}
 
 	private void logRequest(ChatClientRequest request) {
-        String userText = request.prompt().getInstructions().stream()
-                .filter(message -> message instanceof UserMessage) // 筛选用户消息
-                .findFirst()
-                .map(message -> ((UserMessage) message).getText()) // 安全转换获取内容
-                .orElse("无用户输入");
 
 		// Object contextValue = request.context().getOrDefault("123", "未获取到值");
 		// log.info("上下文 key=123 的值：{}", contextValue);
-        log.info("AI Request: {}", userText);
+        log.info("AI Request: {}", request.prompt().getUserMessage().getText());
 	}
 
 	private void logResponse(ChatClientResponse chatClientResponse) {
-        ChatResponse chatResponse = chatClientResponse.chatResponse();
 
-        String aiText = chatResponse.getResults().stream()
-                .findFirst()
-                .map(result -> result.getOutput())
-                .filter(output -> output instanceof AssistantMessage)
-                .map(output -> ((AssistantMessage) output).getText())
-                .orElse("无回复内容");
-
-        log.info("AI Response: {}", aiText);
+        log.info("AI Response: {}", chatClientResponse.chatResponse().getResult().getOutput().getText());
 	}
 }
 

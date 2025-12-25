@@ -1,25 +1,24 @@
 package com.yu.histoaiagent.app;
 
-
 import com.yu.histoaiagent.advisor.MyLoggerAdvisor;
-import com.yu.histoaiagent.advisor.ReReadingAdvisor;
-import com.yu.histoaiagent.chatmemory.FileBasedChatMemory;
+import com.yu.histoaiagent.chatmemory.RedisChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 基于Redis持久化的心理咨询应用
+ * 使用RedisChatMemory实现会话记忆存储
+ */
 @Component
 @Slf4j
-public class TherapyApp {
+public class TherapyAppRedis {
 
     private ChatClient chatClient;
 
@@ -57,41 +56,39 @@ public class TherapyApp {
             "表达伤人念头：“伤害他人或自己并不能解决问题，反而会带来更多困扰。建议你先冷静下来，告诉我是什么让你产生了这样的想法，我们一起看看有没有其他解决方式。”\n";
 
     /**
-     * Ai client 搭建
-     * @param dashscopeChatModel
+     * 构造函数 - 使用Redis持久化的ChatMemory
+     * 
+     * @param dashscopeChatModel AI模型
+     * @param redisChatMemory Redis实现的ChatMemory
      */
-    public TherapyApp(ChatModel dashscopeChatModel) {
-        // 文件存储对话
-        String FILE_DIR = System.getProperty("user.dir") + "/tmp/chat-memory";
-
-        ChatMemory chatMemory = new FileBasedChatMemory(FILE_DIR);
-        // 内存存储对话上下文
-//        InMemoryChatMemoryRepository chatMemoryRepository = new InMemoryChatMemoryRepository();
-//
-//        ChatMemory chatMemory = MessageWindowChatMemory
-//                .builder()
-//                .maxMessages(1)
-//                .chatMemoryRepository(chatMemoryRepository)
-//                .build();
+    public TherapyAppRedis(
+            ChatModel dashscopeChatModel,
+            RedisChatMemory redisChatMemory) {
+        
+        log.info("Initializing TherapyAppRedis with Redis-based chat memory");
 
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYS_PROMPT)
                 .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                        // 使用Redis ChatMemory
+                        MessageChatMemoryAdvisor.builder(redisChatMemory).build(),
                         new MyLoggerAdvisor()
-                        //new ReReadingAdvisor()
                 )
                 .build();
 
+        log.info("TherapyAppRedis initialized successfully");
     }
 
     /**
-     * AI 基础多轮对话
-     * @param message
-     * @param conversationId
-     * @return
+     * AI基础多轮对话
+     * 
+     * @param message 用户消息
+     * @param conversationId 会话ID
+     * @return AI回复内容
      */
     public String doChat(String message, String conversationId) {
+        log.info("Processing chat - conversationId: {}, message: {}", conversationId, message);
+        
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
@@ -99,22 +96,29 @@ public class TherapyApp {
                         a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)
                 )
                 .call()
-                // .entity(User.class)
                 .chatResponse();
+        
         String content = chatResponse.getResult().getOutput().getText();
+        log.info("AI response generated successfully");
         return content;
     }
 
-    record TherapyReport(String title, List<String> suggestions) {}
+    /**
+     * 治疗报告记录
+     */
+    public record TherapyReport(String title, List<String> suggestions) {
+    }
 
-
-        /**
-     * AI 对话结构化输出报告
-     * @param message
-     * @param conversationId
-     * @return
+    /**
+     * AI对话结构化输出报告
+     * 
+     * @param message 用户消息
+     * @param conversationId 会话ID
+     * @return 治疗报告
      */
     public TherapyReport doChatWithReport(String message, String conversationId) {
+        log.info("Generating therapy report - conversationId: {}", conversationId);
+        
         TherapyReport therapyReport = chatClient
                 .prompt()
                 .system(SYS_PROMPT + "每次对话后都要生成结果，标题为{用户名}的治疗报告，内容为提供的治疗建议")
@@ -124,6 +128,8 @@ public class TherapyApp {
                 )
                 .call()
                 .entity(TherapyReport.class);
+        
+        log.info("Therapy report generated: {}", therapyReport);
         return therapyReport;
     }
 }
