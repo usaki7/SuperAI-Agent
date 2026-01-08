@@ -38,4 +38,13 @@ class TherapyAppTest {
         TherapyApp.TherapyReport therapyReport = therapyApp.doChatWithReport(message, conversationId);
         Assertions.assertNotNull(therapyReport);
     }
+
+    @Test
+    void doChatWithRag() {
+        String conversationId = UUID.randomUUID().toString();
+
+        String message = "你好，我是TT。我得了抑郁症，经常在早上起床时感到胸口烦闷，一整天都没有精神";
+        String therapyReport = therapyApp.doChatWithRag(message, conversationId);
+        Assertions.assertNotNull(therapyReport);
+    }
 }

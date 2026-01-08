@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
  */
 @Slf4j
 public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleLoggerAdvisor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MyLoggerAdvisor.class);
 
     @Override
     public String getName() {
@@ -36,7 +36,7 @@ public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
 
     @Override
     public int getOrder() {
-        return 0;
+        return 1;
     }
 
 

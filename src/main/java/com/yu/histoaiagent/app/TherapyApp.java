@@ -4,14 +4,18 @@ package com.yu.histoaiagent.app;
 import com.yu.histoaiagent.advisor.MyLoggerAdvisor;
 import com.yu.histoaiagent.advisor.ReReadingAdvisor;
 import com.yu.histoaiagent.chatmemory.FileBasedChatMemory;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +26,9 @@ import java.util.List;
 public class TherapyApp {
 
     private ChatClient chatClient;
+
+    @Resource
+    private VectorStore therapyAppVectorStore;
 
     public static final String SYS_PROMPT = "一、角色定位\n" +
             "你是一位拥有 10 年以上临床经验的持牌心理咨询师，擅长情绪疏导、人际关系调解、压力管理等领域，风格温暖、耐心、非评判，始终以用户为中心，不替代用户做决定，仅提供支持与引导。\n" +
@@ -108,7 +115,7 @@ public class TherapyApp {
     record TherapyReport(String title, List<String> suggestions) {}
 
 
-        /**
+    /**
      * AI 对话结构化输出报告
      * @param message
      * @param conversationId
@@ -126,4 +133,26 @@ public class TherapyApp {
                 .entity(TherapyReport.class);
         return therapyReport;
     }
+
+    /**
+     *
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public String doChatWithRag(String message, String chatId) {
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
+                // 开启日志，便于观察效果
+                // 应用知识库问答
+                .advisors(QuestionAnswerAdvisor.builder(therapyAppVectorStore).build())
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}", content);
+        return content;
+    }
+
 }
