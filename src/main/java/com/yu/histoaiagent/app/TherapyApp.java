@@ -4,6 +4,7 @@ package com.yu.histoaiagent.app;
 import com.yu.histoaiagent.advisor.MyLoggerAdvisor;
 import com.yu.histoaiagent.advisor.ReReadingAdvisor;
 import com.yu.histoaiagent.chatmemory.FileBasedChatMemory;
+import com.yu.histoaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -15,6 +16,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Component;
@@ -134,6 +136,11 @@ public class TherapyApp {
         return therapyReport;
     }
 
+    @Resource
+    private VectorStore pgVectorVectorStore;
+    @Resource
+    private QueryRewriter queryRewriter;
+
     /**
      *
      * @param message
@@ -141,13 +148,18 @@ public class TherapyApp {
      * @return
      */
     public String doChatWithRag(String message, String chatId) {
+        //查询重写
+        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
+
         ChatResponse chatResponse = chatClient
                 .prompt()
-                .user(message)
+                .user(rewrittenMessage)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 // 开启日志，便于观察效果
                 // 应用知识库问答
                 .advisors(QuestionAnswerAdvisor.builder(therapyAppVectorStore).build())
+                // Pgvector
+                //.advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
