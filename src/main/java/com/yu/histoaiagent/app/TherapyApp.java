@@ -86,7 +86,6 @@ public class TherapyApp {
 //                .build();
 
         chatClient = ChatClient.builder(dashscopeChatModel)
-                .defaultSystem(SYS_PROMPT)
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         new MyLoggerAdvisor()
@@ -105,6 +104,7 @@ public class TherapyApp {
     public String doChat(String message, String conversationId) {
         ChatResponse chatResponse = chatClient
                 .prompt()
+                .system(SYS_PROMPT)
                 .user(message)
                 .advisors(
                         a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)

@@ -79,7 +79,11 @@ class TherapyAppTest {
     void doChatWithMcp() {
         String chatId = UUID.randomUUID().toString();
         // 测试地图 MCP
-        String message = "我的另一半居住在上海静安区，请帮我找到 5 公里内合适的约会地点";
+        //String message = "我的另一半居住在上海静安区，请帮我找到 5 公里内合适的约会地点";
+        //String answer =  therapyApp.doChatWithMcp(message, chatId);
+
+        // 测试图片搜索 MCP
+        String message = "帮我搜索一些哄另一半开心的图片，给出图片url";
         String answer =  therapyApp.doChatWithMcp(message, chatId);
     }
 
