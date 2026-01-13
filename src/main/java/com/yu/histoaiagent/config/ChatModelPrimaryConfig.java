@@ -12,7 +12,7 @@ public class ChatModelPrimaryConfig {
     // 标记 dashscopeChatModel 为全局默认的 ChatModel
     @Primary
     @Bean
-    public ChatModel primaryChatModel(@Qualifier("dashscopeChatModel") ChatModel dashscopeChatModel) {
+    public ChatModel primaryChatModel(@Qualifier("dashScopeChatModel") ChatModel dashscopeChatModel) {
         return dashscopeChatModel;
     }
 

@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 public class SpringAiInvoke implements CommandLineRunner {
 
     @Resource
-    @Qualifier("dashscopeChatModel")
-    private ChatModel dashscopeChatModel;
+    @Qualifier("dashScopeChatModel")
+    private ChatModel dashScopeChatModel;
 
     @Override
     public void run(String... args) throws Exception {
-        AssistantMessage assistantMessage = dashscopeChatModel.call(new Prompt("hello, I'm TT"))
+        AssistantMessage assistantMessage = dashScopeChatModel.call(new Prompt("hello, I'm TT"))
                 .getResult()
                 .getOutput();
         System.out.println(assistantMessage.getText());
