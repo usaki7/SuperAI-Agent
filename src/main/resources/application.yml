@@ -16,8 +16,8 @@ spring:
   profiles:
     active: local
 
-#  datasource:
-#    url: jdbc:postgresql://pgm-bp1v8z18l65603064o.rwlb.rds.aliyuncs.com/ai-agent
+  datasource:
+    url: jdbc:postgresql://pgm-bp1v8z18l65603064o.rwlb.rds.aliyuncs.com/ai-agent
 
   ai:
     vectorstore:
