@@ -1,6 +1,3 @@
-### Custom ###
-application-local.yml
-
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -34,4 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-/histo-ai-agent-frontend/histo-ai-agent-frontend/node_modules/
